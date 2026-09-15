@@ -285,4 +285,67 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // 7. Global Smooth Scroll & In-Page Navigation (Prevents Any Separate Page Navigation)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    // Never allow any link to open in a new tab or window
+    if (link.getAttribute('target')) {
+      link.removeAttribute('target');
+    }
+
+    const href = link.getAttribute('href') || '';
+
+    // Mail and phone links work naturally
+    if (href.startsWith('mailto:') || href.startsWith('tel:')) return;
+
+    // Enquiry & modal triggers
+    if (href === '#enquire' || href === '#dealer' || href === '#careers' || href === '#downloads') {
+      e.preventDefault();
+      const catMap = {
+        '#dealer': 'dealer',
+        '#downloads': 'downloads',
+        '#careers': 'export'
+      };
+      openEnquiry(e, catMap[href] || '');
+      return;
+    }
+
+    // Video modal trigger (YouTube links / media buttons)
+    if (href.includes('youtube.com') || link.classList.contains('btn-youtube')) {
+      e.preventDefault();
+      openVideo();
+      return;
+    }
+
+    // Top / Home navigation
+    if (href === '#' || href === '#home') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Anchor navigation to internal sections
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const targetEl = document.querySelector(href);
+      if (targetEl) {
+        const headerOffset = 80;
+        const elPos = targetEl.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: elPos - headerOffset,
+          behavior: 'smooth'
+        });
+      } else if (href === '#privacy' || href === '#terms' || href === '#sitemap') {
+        openEnquiry(e, 'downloads');
+      }
+      return;
+    }
+
+    // Prevent any other relative or external page navigation
+    e.preventDefault();
+  });
 });
+
