@@ -83,6 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', closeMobileMenu);
       }
     });
+
+    // Auto-clean mobile drawer & accordion state when switching or resizing to desktop view
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        closeMobileMenu();
+      }
+    });
   }
 
   // 2. Hero Slider Navigation
