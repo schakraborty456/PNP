@@ -9,10 +9,23 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Expires', '0')
         super().end_headers()
 
+    # Silently handle client resets (browser close / mobile disconnect)
+    def handle_one_request(self):
+        try:
+            super().handle_one_request()
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+            pass
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
 if __name__ == '__main__':
     port = 3000
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", port), NoCacheHandler) as httpd:
-        print(f"Serving at http://localhost:{port} without cache")
+    with ThreadedTCPServer(("", port), NoCacheHandler) as httpd:
+        print(f"Serving at http://localhost:{port} without cache (multi-threaded)")
         sys.stdout.flush()
-        httpd.serve_forever()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
