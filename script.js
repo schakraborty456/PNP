@@ -76,6 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', closeMobileMenu);
     });
 
+    const megaLinks = document.querySelectorAll('.mega-link');
+    megaLinks.forEach(link => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+
     // Top links without dropdown close mobile menu
     navLinks.forEach(link => {
       const parent = link.closest('.has-dropdown');
@@ -92,13 +97,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 1.1 Sticky Header Scroll Effect (Dynamic Shrink & Frosted Glass)
+  const mainHeader = document.getElementById('mainHeader');
+  if (mainHeader) {
+    let ticking = false;
+    const handleScroll = () => {
+      if (window.scrollY > 30) {
+        mainHeader.classList.add('scrolled');
+      } else {
+        mainHeader.classList.remove('scrolled');
+      }
+      ticking = false;
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleScroll);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Initial check on page load
+    handleScroll();
+  }
+
   // 2. Hero Slider Navigation
   const sliderDots = document.querySelectorAll('.slider-dot');
+  const heroSlides = document.querySelectorAll('.hero-slide');
   let currentSlide = 1;
-  const totalSlides = 3;
+  const totalSlides = sliderDots.length || 3;
+  let heroSlideInterval = null;
 
   const setSlide = (slideIndex) => {
     currentSlide = slideIndex;
+    
+    // Update active dot
     sliderDots.forEach(dot => {
       const dotSlide = parseInt(dot.getAttribute('data-slide'), 10);
       if (dotSlide === slideIndex) {
@@ -107,21 +140,36 @@ document.addEventListener('DOMContentLoaded', () => {
         dot.classList.remove('active');
       }
     });
+
+    // Update active background slide with smooth crossfade
+    heroSlides.forEach((slide, idx) => {
+      if (idx + 1 === slideIndex) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+  };
+
+  const startHeroTimer = () => {
+    if (heroSlideInterval) clearInterval(heroSlideInterval);
+    heroSlideInterval = setInterval(() => {
+      let nextSlide = currentSlide + 1;
+      if (nextSlide > totalSlides) nextSlide = 1;
+      setSlide(nextSlide);
+    }, 5500);
   };
 
   sliderDots.forEach(dot => {
     dot.addEventListener('click', () => {
       const slideNum = parseInt(dot.getAttribute('data-slide'), 10);
       setSlide(slideNum);
+      startHeroTimer(); // restart auto-timer after user interaction
     });
   });
 
-  // Auto advance hero slider gently every 6 seconds
-  setInterval(() => {
-    let nextSlide = currentSlide + 1;
-    if (nextSlide > totalSlides) nextSlide = 1;
-    setSlide(nextSlide);
-  }, 6000);
+  // Start auto-advancing slides
+  startHeroTimer();
 
   // 3. Media Carousel Controls
   const mediaCarousel = document.getElementById('mediaCarousel') || document.getElementById('mediaCardsRow');
@@ -355,4 +403,5 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
   });
 });
+
 
