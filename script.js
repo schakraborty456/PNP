@@ -226,9 +226,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const playBuildingVideoAbout = document.getElementById('playBuildingVideoAbout');
+
   if (playBuildingVideo) {
     playBuildingVideo.addEventListener('click', () => {
       openVideo('NYTEX Factory & Infrastructure Tour | Bhilad Plant');
+    });
+  }
+
+  if (playBuildingVideoAbout) {
+    playBuildingVideoAbout.addEventListener('click', () => {
+      openVideo('Corporate Infrastructure & Bhilad Plant Tour | PNP Polytex');
     });
   }
 
@@ -255,14 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const openEnquiry = (e, category = '') => {
     if (e && e.preventDefault) e.preventDefault();
-    if (interestSelect && category) {
-      interestSelect.value = category;
-    }
-    if (enquiryModal) {
-      enquiryModal.classList.add('active');
-      enquiryModal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-    }
+    const query = category ? `?division=${encodeURIComponent(category)}` : '';
+    window.location.href = `enquiry.html${query}`;
   };
 
   const closeEnquiry = () => {
@@ -273,11 +275,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Synwood 21 Catalogues Modal
+  const synwoodModal = document.getElementById('synwoodModal');
+  const openSynwoodModal = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (synwoodModal) {
+      synwoodModal.classList.add('active');
+      synwoodModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  const closeSynwoodModal = () => {
+    if (synwoodModal) {
+      synwoodModal.classList.remove('active');
+      synwoodModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  };
+
   // Expose to window for inline onclick handlers across pages
   window.openEnquiry = openEnquiry;
   window.closeEnquiry = closeEnquiry;
   window.openVideo = openVideo;
   window.closeVideo = closeVideo;
+  window.openSynwoodModal = openSynwoodModal;
+  window.closeSynwoodModal = closeSynwoodModal;
 
   if (openEnquireModal) {
     openEnquireModal.addEventListener('click', (e) => openEnquiry(e));
@@ -295,10 +318,77 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEnquiryModal.addEventListener('click', closeEnquiry);
   }
 
+  if (enquiryModal) {
+    enquiryModal.addEventListener('click', (e) => {
+      if (e.target === enquiryModal) {
+        closeEnquiry();
+      }
+    });
+  }
+
+  const closeSynwoodModalBtn = document.getElementById('closeSynwoodModal');
+  if (closeSynwoodModalBtn) {
+    closeSynwoodModalBtn.addEventListener('click', closeSynwoodModal);
+  }
+
+  if (synwoodModal) {
+    synwoodModal.addEventListener('click', (e) => {
+      if (e.target === synwoodModal) {
+        closeSynwoodModal();
+      }
+    });
+  }
+
+  // Global Escape key to dismiss any open modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      closeVideo();
+      closeEnquiry();
+      closeSynwoodModal();
+    }
+  });
+
+  // Synwood filter buttons
+  const synwoodFilterBtns = document.querySelectorAll('.synwood-filter-btn');
+  const synwoodItems = document.querySelectorAll('.synwood-dl-item');
+  synwoodFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      synwoodFilterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.getAttribute('data-filter') || 'all';
+      synwoodItems.forEach(item => {
+        if (filter === 'all' || item.getAttribute('data-category') === filter) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Trading Division Switcher Tabs
+  const divisionTabBtns = document.querySelectorAll('.division-tab-btn');
+  const divisionViews = document.querySelectorAll('.division-view-panel');
+  divisionTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      divisionTabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const targetView = btn.getAttribute('data-target');
+      divisionViews.forEach(view => {
+        if (view.id === targetView) {
+          view.style.display = 'block';
+        } else {
+          view.style.display = 'none';
+        }
+      });
+    });
+  });
+
   // Close modals on clicking backdrop
   window.addEventListener('click', (e) => {
     if (e.target === videoModal) closeVideo();
     if (e.target === enquiryModal) closeEnquiry();
+    if (e.target === synwoodModal) closeSynwoodModal();
   });
 
   // Close on Escape key
@@ -306,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape') {
       closeVideo();
       closeEnquiry();
+      closeSynwoodModal();
     }
   });
 
@@ -341,20 +432,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 7. Global Smooth Scroll & In-Page Navigation (Prevents Any Separate Page Navigation)
+  // 7. Global Smooth Scroll & In-Page Navigation
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
     if (!link) return;
-
-    // Never allow any link to open in a new tab or window
-    if (link.getAttribute('target')) {
-      link.removeAttribute('target');
-    }
 
     const href = link.getAttribute('href') || '';
 
     // Mail and phone links work naturally
     if (href.startsWith('mailto:') || href.startsWith('tel:')) return;
+
+    // PDF files, Google Drive links, and Baginnov website should open normally
+    if (href.toLowerCase().endsWith('.pdf') || href.includes('drive.google.com') || href.includes('baginnov.in')) {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+      return;
+    }
+
+    // Never allow internal page links to open in a new tab or window
+    if (link.getAttribute('target') && !href.startsWith('http')) {
+      link.removeAttribute('target');
+    }
 
     // Enquiry & modal triggers
     if (href === '#enquire' || href === '#dealer' || href === '#careers' || href === '#downloads') {
@@ -365,6 +463,12 @@ document.addEventListener('DOMContentLoaded', () => {
         '#careers': 'export'
       };
       openEnquiry(e, catMap[href] || '');
+      return;
+    }
+
+    if (href === '#synwood-catalogues' || link.classList.contains('open-synwood-btn')) {
+      e.preventDefault();
+      openSynwoodModal(e);
       return;
     }
 
@@ -399,7 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Prevent any other relative or external page navigation
+    // HTML multi-page navigation links (e.g. manufacturing.html, trading.html, retail.html, downloads.html, contact.html)
+    if (href.endsWith('.html') || href.includes('.html#')) {
+      return; // Allow direct navigation to HTML pages
+    }
+
+    // Prevent any other unrecognized page navigation
     e.preventDefault();
   });
 });
