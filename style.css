@@ -8285,6 +8285,160 @@ textarea.form-control {
   line-height: 1.4;
 }
 
+/* ====================================================
+   TRADING & DISTRIBUTION HERO (BOTTOM QUICKNAV BAR)
+   ==================================================== */
+#trading-hero .hero-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 26px !important;
+  width: min(1320px, calc(100% - 48px)) !important;
+  margin: 0 auto !important;
+}
+
+#trading-hero .hero-top-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 32px !important;
+  width: 100% !important;
+}
+
+#trading-hero .hero-content {
+  width: 520px !important;
+  max-width: 520px !important;
+  flex-shrink: 0 !important;
+}
+
+#trading-hero .trading-trust-stats-bar {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 14px !important;
+  width: 630px !important;
+  max-width: 630px !important;
+  min-height: 220px !important;
+  flex-shrink: 0 !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 18px !important;
+  padding: 26px 22px !important;
+  margin: 0 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3) !important;
+  align-items: stretch !important;
+}
+
+#trading-hero .trading-stat-item {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-bottom: none !important;
+  padding-right: 12px !important;
+}
+
+#trading-hero .trading-stat-item:last-child {
+  border-right: none !important;
+  padding-right: 0 !important;
+}
+
+#trading-hero .trading-stat-num {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #FFFFFF !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1.15 !important;
+}
+
+#trading-hero .trading-stat-num.accent-red {
+  color: #EF4444 !important;
+}
+
+#trading-hero .trading-stat-num.accent-blue {
+  color: #38BDF8 !important;
+}
+
+#trading-hero .trading-stat-num.accent-green {
+  color: #34D399 !important;
+}
+
+#trading-hero .trading-stat-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #94A3B8 !important;
+  line-height: 1.35 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.6px !important;
+  margin: 0 !important;
+}
+
+#trading-hero .page-quicknav {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding-top: 18px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+#trading-hero .quicknav-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #F1F5F9 !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  white-space: nowrap !important;
+}
+
+#trading-hero .quicknav-link:hover {
+  background: var(--primary-red) !important;
+  border-color: var(--primary-red) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 14px rgba(229, 35, 41, 0.4) !important;
+}
+
+@media (max-width: 1100px) {
+  #trading-hero .hero-top-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+  }
+  #trading-hero .hero-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  #trading-hero .trading-trust-stats-bar {
+    width: 100% !important;
+    max-width: 630px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  #trading-hero .trading-trust-stats-bar {
+    grid-template-columns: repeat(2, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+  }
+}
+
 /* Responsiveness additions for Trading */
 @media (max-width: 900px) {
   .trading-trust-stats-bar {
