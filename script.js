@@ -511,6 +511,318 @@ document.addEventListener('DOMContentLoaded', () => {
     // Prevent any other unrecognized page navigation
     e.preventDefault();
   });
+
+  // 12. 3D Coverflow Perspective Carousel (Our 5 Market-Leading Own Brands)
+  initBrandCoverflow();
 });
+
+function initBrandCoverflow() {
+  const container = document.getElementById('brandCoverflow');
+  if (!container) return;
+
+  const stage = container.querySelector('.coverflow-stage');
+  const cards = Array.from(container.querySelectorAll('.coverflow-card'));
+  const prevBtn = document.getElementById('coverflowPrev');
+  const nextBtn = document.getElementById('coverflowNext');
+  const dots = Array.from(container.querySelectorAll('.coverflow-dot'));
+  const total = cards.length;
+  if (total === 0) return;
+
+  let currentIndex = 0;
+  let autoplayTimer = null;
+  let isInteracting = false;
+
+  function updatePositions() {
+    cards.forEach((card, i) => {
+      let diff = (i - currentIndex) % total;
+      if (diff < -Math.floor(total / 2)) diff += total;
+      if (diff > Math.floor(total / 2)) diff -= total;
+
+      card.setAttribute('data-pos', diff.toString());
+      if (diff === 0) {
+        card.setAttribute('aria-hidden', 'false');
+        card.classList.add('is-active');
+      } else {
+        card.setAttribute('aria-hidden', 'true');
+        card.classList.remove('is-active');
+      }
+    });
+
+    dots.forEach((dot, i) => {
+      if (i === currentIndex) {
+        dot.classList.add('active');
+        dot.setAttribute('aria-selected', 'true');
+      } else {
+        dot.classList.remove('active');
+        dot.setAttribute('aria-selected', 'false');
+      }
+    });
+  }
+
+  function goToIndex(index) {
+    currentIndex = ((index % total) + total) % total;
+    updatePositions();
+  }
+
+  function nextSlide() {
+    goToIndex(currentIndex + 1);
+  }
+
+  function prevSlide() {
+    goToIndex(currentIndex - 1);
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      prevSlide();
+      resetAutoplay();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nextSlide();
+      resetAutoplay();
+    });
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(dot.getAttribute('data-index'), 10);
+      if (!isNaN(idx)) {
+        goToIndex(idx);
+        resetAutoplay();
+      }
+    });
+  });
+
+  // Click on side card brings it to center
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      const pos = parseInt(card.getAttribute('data-pos'), 10);
+      if (pos !== 0) {
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = parseInt(card.getAttribute('data-index'), 10);
+        goToIndex(idx);
+        resetAutoplay();
+      }
+    });
+  });
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    const rect = container.getBoundingClientRect();
+    const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+    if (!isInView) return;
+
+    if (e.key === 'ArrowLeft') {
+      prevSlide();
+      resetAutoplay();
+    } else if (e.key === 'ArrowRight') {
+      nextSlide();
+      resetAutoplay();
+    }
+  });
+
+  // Touch and Mouse Drag / Swipe
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+
+  function onPointerDown(e) {
+    // If clicking a link/button inside the active card, allow native click
+    if (e.target.closest('a') || e.target.closest('button')) {
+      return;
+    }
+    isDragging = true;
+    startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    currentX = startX;
+    stopAutoplay();
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+  }
+
+  function onPointerUp() {
+    if (!isDragging) return;
+    isDragging = false;
+    const deltaX = currentX - startX;
+    const threshold = 40;
+    if (deltaX > threshold) {
+      prevSlide();
+    } else if (deltaX < -threshold) {
+      nextSlide();
+    }
+    resetAutoplay();
+  }
+
+  if (stage) {
+    stage.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    stage.addEventListener('touchstart', onPointerDown, { passive: true });
+    stage.addEventListener('touchmove', onPointerMove, { passive: true });
+    stage.addEventListener('touchend', onPointerUp, { passive: true });
+  }
+
+  function startAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    autoplayTimer = setInterval(() => {
+      if (!isInteracting) {
+        nextSlide();
+      }
+    }, 5000);
+  }
+
+  function stopAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+  }
+
+  function resetAutoplay() {
+    stopAutoplay();
+    startAutoplay();
+  }
+
+  container.addEventListener('mouseenter', () => {
+    isInteracting = true;
+    stopAutoplay();
+  });
+
+  container.addEventListener('mouseleave', () => {
+    isInteracting = false;
+    startAutoplay();
+  });
+
+  // Initialize positions
+  updatePositions();
+  startAutoplay();
+}
+
+/* ----------------------------------------------------
+   24 PRODUCT CATEGORIES MATRIX TABBED SHOWCASE
+   ---------------------------------------------------- */
+let currentCategoryTab = 'travel';
+
+function switchCategoryTab(tabCategory) {
+  currentCategoryTab = tabCategory;
+  
+  // Update Tab Buttons Active State
+  const tabBtns = document.querySelectorAll('.matrix-tab-btn');
+  tabBtns.forEach(btn => {
+    if (btn.getAttribute('data-tab') === tabCategory) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    } else {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    }
+  });
+
+  const grid = document.getElementById('categories24Grid');
+  if (grid) {
+    if (tabCategory === 'all') {
+      grid.classList.add('show-all-grid');
+    } else {
+      grid.classList.remove('show-all-grid');
+    }
+  }
+
+  // Clear search input on tab switch
+  const input = document.getElementById('categorySearchInput');
+  if (input) input.value = '';
+
+  const tiles = document.querySelectorAll('.categories-24-grid .category-tile');
+  let visibleCount = 0;
+
+  tiles.forEach(tile => {
+    const cat = tile.getAttribute('data-category');
+    if (tabCategory === 'all' || cat === tabCategory) {
+      tile.style.display = 'flex';
+      visibleCount++;
+    } else {
+      tile.style.display = 'none';
+    }
+  });
+
+  const countEl = document.getElementById('visibleCategoryCount');
+  if (countEl) countEl.innerText = visibleCount;
+}
+
+function filterCategoriesMatrix() {
+  const input = document.getElementById('categorySearchInput');
+  if (!input) return;
+  const filter = input.value.toLowerCase().trim();
+  const tiles = document.querySelectorAll('.categories-24-grid .category-tile');
+  let visibleCount = 0;
+
+  // Deactivate specific tabs when searching across all items
+  if (filter.length > 0) {
+    document.querySelectorAll('.matrix-tab-btn').forEach(btn => btn.classList.remove('active'));
+    const grid = document.getElementById('categories24Grid');
+    if (grid) grid.classList.add('show-all-grid');
+  }
+
+  tiles.forEach(tile => {
+    const text = tile.innerText.toLowerCase();
+    if (!filter || text.includes(filter)) {
+      tile.style.display = 'flex';
+      visibleCount++;
+    } else {
+      tile.style.display = 'none';
+    }
+  });
+
+  const countEl = document.getElementById('visibleCategoryCount');
+  if (countEl) {
+    countEl.innerText = visibleCount;
+  }
+}
+
+// Auto Initialize Default Tab
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('.matrix-tabs-wrapper')) {
+    switchCategoryTab('travel');
+  }
+});
+
+/* ----------------------------------------------------
+   3 BUSINESS DIVISIONS TAB SWITCHER
+   ---------------------------------------------------- */
+function switchDivisionTab(targetDivision) {
+  const tabBtns = document.querySelectorAll('.division-tab-btn');
+  tabBtns.forEach(btn => {
+    if (btn.getAttribute('data-division') === targetDivision) {
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    } else {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    }
+  });
+
+  const panels = document.querySelectorAll('.division-panel');
+  panels.forEach(panel => {
+    const divPanel = panel.getAttribute('data-division-panel');
+    if (targetDivision === 'all' || divPanel === targetDivision) {
+      panel.style.display = 'flex';
+      panel.style.opacity = '1';
+    } else {
+      panel.style.display = 'none';
+      panel.style.opacity = '0';
+    }
+  });
+}
+
+
 
 
